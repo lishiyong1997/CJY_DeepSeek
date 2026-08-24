@@ -926,6 +926,65 @@
   }
 
   /* ----------------------------------------------------------------------
+   * 6b. 内容分区交互：Tabs 筛选 / 倒计时 / 进度条 / 演示 Toast
+   * -------------------------------------------------------------------- */
+  function initTabs() {
+    $$('[data-tabs]').forEach(function (wrap) {
+      var target = document.getElementById(wrap.getAttribute('data-tabs'));
+      if (!target) return;
+      var items = target.querySelectorAll('[data-src], [data-ct], [data-jt]');
+      var tabs = wrap.querySelectorAll('.tab');
+      tabs.forEach(function (tab) {
+        tab.addEventListener('click', function () {
+          tabs.forEach(function (t) { t.classList.remove('active'); });
+          tab.classList.add('active');
+          var f = tab.getAttribute('data-f');
+          items.forEach(function (it) {
+            var key = it.getAttribute('data-src') || it.getAttribute('data-ct') || it.getAttribute('data-jt');
+            it.style.display = (f === 'all' || key === f) ? '' : 'none';
+          });
+        });
+      });
+    });
+  }
+
+  function initCountdown() {
+    $$('[data-deadline]').forEach(function (el) {
+      var target = new Date(el.getAttribute('data-deadline')).getTime();
+      function tick() {
+        var diff = target - Date.now();
+        if (diff <= 0) { el.textContent = '已截止'; return; }
+        var d = Math.floor(diff / 86400000);
+        var h = Math.floor(diff % 86400000 / 3600000);
+        var m = Math.floor(diff % 3600000 / 60000);
+        var s = Math.floor(diff % 60000 / 1000);
+        var p = function (x) { return (x < 10 ? '0' : '') + x; };
+        el.innerHTML = (d > 0 ? d + '<i>天</i> ' : '') + p(h) + ':' + p(m) + ':' + p(s);
+      }
+      tick();
+      setInterval(tick, 1000);
+    });
+  }
+
+  function initBars() {
+    var cards = $$('.ep-card');
+    if (!cards.length) return;
+    if (!('IntersectionObserver' in window)) { cards.forEach(function (c) { c.classList.add('in'); }); return; }
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
+      });
+    }, { threshold: 0.3 });
+    cards.forEach(function (c) { io.observe(c); });
+  }
+
+  function initToastBind() {
+    $$('[data-toast]').forEach(function (el) {
+      el.addEventListener('click', function () { toast(el.getAttribute('data-toast'), 'ok'); });
+    });
+  }
+
+  /* ----------------------------------------------------------------------
    * 7. 启动
    * -------------------------------------------------------------------- */
   function boot() {
@@ -936,6 +995,10 @@
     initStatCounters();
     initReveal();
     initSideNav();
+    initTabs();
+    initCountdown();
+    initBars();
+    initToastBind();
     initDashboard();
     initLogin();
   }
