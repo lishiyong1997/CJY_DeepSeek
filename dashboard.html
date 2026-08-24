@@ -3,117 +3,570 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="theme-color" content="#050B14" />
 <title>数字智能运营驾驶舱 · 国家国防科技工业软件产教研平台</title>
-<meta name="description" content="国家国防科技工业软件产教研平台数字智能运营驾驶舱，实时展示全平台关键运营数据。" />
-<link rel="stylesheet" href="assets/css/main.css" />
+<meta name="description" content="国家国防科技工业软件产教研平台数字智能运营驾驶舱，实时呈现全平台关键运营数据。" />
+<style>
+/* ============================================================
+   数字智能运营驾驶舱 · 设计系统
+   深色大屏 · 值守蓝 + 军工金 · 零外部依赖
+   ============================================================ */
+:root{
+  --navy-950:#050B14; --navy-900:#0A1526; --navy-800:#0D1B30; --navy-700:#12233D;
+  --blue:#2F6FD0; --blue-2:#5B93E3; --blue-3:#7FAEEA; --blue-4:#9FC2EE;
+  --gold:#C9A55C; --gold-2:#E3C88E;
+  --green:#6FCFA6; --green-d:#2E8A6B;
+  --purple:#8A6FD0; --teal:#4FB693; --amber:#C08428;
+  --ink:#E8EFF9; --ink-2:rgba(255,255,255,.55); --ink-3:rgba(255,255,255,.3);
+  --line:rgba(120,155,210,.14); --line-2:rgba(120,155,210,.22);
+  --font:-apple-system,BlinkMacSystemFont,'PingFang SC','HarmonyOS Sans SC','MiSans','Noto Sans SC','Source Han Sans SC','Microsoft YaHei',sans-serif;
+  --num:'Bahnschrift','DIN Alternate','Segoe UI',var(--font);
+  --r-sm:6px; --r-md:10px; --r-lg:14px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{font-family:var(--font);color:var(--ink);background:var(--navy-950);line-height:1.6;font-size:14px;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+a{color:inherit;text-decoration:none}
+button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+.num{font-family:var(--num);font-variant-numeric:tabular-nums;letter-spacing:.01em}
+::-webkit-scrollbar{width:10px;height:10px}
+::-webkit-scrollbar-track{background:var(--navy-950)}
+::-webkit-scrollbar-thumb{background:#1C3150;border-radius:8px;border:2px solid var(--navy-950)}
+::-webkit-scrollbar-thumb:hover{background:#29476e}
+
+/* ---------- 驾驶舱主体 ---------- */
+.cockpit{position:relative;min-height:100vh;background:var(--navy-950);overflow-y:auto}
+.cockpit::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:linear-gradient(rgba(47,111,208,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(47,111,208,.035) 1px,transparent 1px);
+  background-size:48px 48px}
+.cockpit::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:radial-gradient(1200px 500px at 50% -10%,rgba(47,111,208,.14),transparent 62%)}
+
+/* ---------- 顶部栏 ---------- */
+.cp-head{position:sticky;top:0;z-index:5;height:62px;background:rgba(6,13,24,.92);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  border-bottom:1px solid rgba(201,165,92,.22);display:flex;align-items:center;gap:18px;padding:0 26px}
+.cp-back{display:inline-flex;align-items:center;gap:8px;color:rgba(255,255,255,.75);font-size:13.5px;font-weight:600;
+  padding:8px 16px;border:1px solid rgba(255,255,255,.16);border-radius:6px;transition:all .2s;flex:none}
+.cp-back:hover{border-color:var(--gold);color:var(--gold-2)}
+.cp-back svg{width:15px;height:15px}
+.cp-title{text-align:center;flex:1}
+.cp-title h1{color:#fff;font-size:19px;font-weight:800;letter-spacing:.3em}
+.cp-title p{font-family:var(--num);font-size:10px;letter-spacing:.34em;color:rgba(201,165,92,.6);margin-top:1px}
+.cp-right{display:flex;align-items:center;gap:18px;flex:none}
+.cp-live{display:inline-flex;align-items:center;gap:7px;color:var(--green);font-size:12px;letter-spacing:.2em;font-weight:700}
+.cp-live::before{content:'';width:7px;height:7px;border-radius:50%;background:var(--green-d);animation:pulse 1.6s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.25}}
+.cp-clock{text-align:right;font-family:var(--num)}
+.cp-clock .t{color:#fff;font-size:19px;font-weight:700;letter-spacing:.08em}
+.cp-clock .d{color:rgba(255,255,255,.4);font-size:11px;letter-spacing:.14em}
+
+/* ---------- 主体 ---------- */
+.cp-body{position:relative;z-index:1;padding:22px 26px 40px;max-width:1560px;margin:0 auto}
+
+/* KPI */
+.cp-kpis{display:grid;grid-template-columns:repeat(8,1fr);gap:12px;margin-bottom:16px}
+.kpi{position:relative;background:linear-gradient(165deg,rgba(20,38,64,.85),rgba(10,20,36,.9));border:1px solid rgba(120,155,210,.14);
+  border-radius:var(--r-md);padding:14px 16px;cursor:default;transition:border-color .2s,transform .2s}
+.kpi:hover{border-color:rgba(201,165,92,.45);transform:translateY(-2px)}
+.kpi::before{content:'';position:absolute;left:0;top:0;bottom:0;width:2px;background:linear-gradient(180deg,var(--gold),transparent);opacity:.55}
+.kpi span{font-size:11.5px;color:rgba(255,255,255,.45);letter-spacing:.08em;display:block}
+.kpi b{font-family:var(--num);font-size:24px;color:#fff;font-weight:700;display:block;margin-top:6px;line-height:1.1}
+.kpi b .suffix{font-size:13px;color:var(--blue-3);font-weight:500;margin-left:2px}
+
+/* 图表网格 */
+.cp-grid{display:grid;grid-template-columns:repeat(12,1fr);gap:14px}
+.cp-card{background:linear-gradient(170deg,rgba(18,35,60,.72),rgba(10,20,36,.86));border:1px solid rgba(120,155,210,.14);
+  border-radius:var(--r-lg);padding:18px 20px;min-width:0;position:relative}
+.cp-card h3{color:var(--ink);font-size:14.5px;font-weight:600;letter-spacing:.1em;display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.cp-card h3::before{content:'';width:3px;height:14px;background:var(--gold);border-radius:2px;flex:none}
+.cp-card h3 .sub{margin-left:auto;font-family:var(--num);font-size:10px;color:rgba(255,255,255,.3);letter-spacing:.2em;font-weight:400}
+.chart{width:100%;height:250px;display:block}
+.span-8{grid-column:span 8}.span-6{grid-column:span 6}.span-5{grid-column:span 5}.span-4{grid-column:span 4}.span-3{grid-column:span 3}
+
+/* 攻关任务看板 */
+.board{display:flex;flex-direction:column;gap:15px;margin-top:6px}
+.board-row{cursor:default}
+.board-row .bh{display:flex;justify-content:space-between;font-size:12.5px;color:rgba(255,255,255,.6);margin-bottom:6px}
+.board-row .bh b{font-family:var(--num);color:#fff}
+.board-row .bo{height:7px;background:rgba(255,255,255,.07);border-radius:4px;overflow:hidden}
+.board-row .bo i{display:block;height:100%;border-radius:4px;width:0;transition:width 1.2s cubic-bezier(.2,.7,.3,1)}
+
+/* 实时动态 */
+.cp-feed{display:flex;flex-direction:column;gap:2px;max-height:250px;overflow:hidden;position:relative}
+.feed-item{display:flex;gap:10px;padding:8px 6px;border-bottom:1px dashed rgba(255,255,255,.06);animation:feedIn .5s cubic-bezier(.2,.7,.3,1)}
+@keyframes feedIn{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:none}}
+.feed-item .fi-t{font-family:var(--num);font-size:11px;color:var(--gold);flex:none;padding-top:2px}
+.feed-item p{font-size:12px;color:rgba(255,255,255,.66);line-height:1.55}
+.feed-item p b{color:var(--blue-4);font-weight:600}
+
+.cp-note{margin-top:16px;text-align:center;font-size:11.5px;color:rgba(255,255,255,.25);letter-spacing:.2em;font-family:var(--num)}
+
+/* ---------- Tooltip 悬浮提示 ---------- */
+.cp-tip{position:fixed;z-index:999;display:none;pointer-events:none;max-width:260px;
+  background:rgba(10,21,38,.97);border:1px solid rgba(201,165,92,.45);border-radius:8px;
+  padding:10px 14px;box-shadow:0 12px 32px -8px rgba(0,0,0,.7)}
+.cp-tip .tt{font-size:13px;color:#fff;font-weight:700;letter-spacing:.03em;margin-bottom:4px;display:flex;align-items:center;gap:6px}
+.cp-tip .tt i{width:7px;height:7px;border-radius:50%;background:var(--gold);flex:none}
+.cp-tip .tt .swatch{width:8px;height:8px;border-radius:2px;flex:none}
+.cp-tip .row{display:flex;justify-content:space-between;gap:14px;font-size:12px;color:rgba(255,255,255,.6);line-height:1.9}
+.cp-tip .row b{font-family:var(--num);color:var(--gold-2);font-weight:700}
+.cp-tip .foot{margin-top:4px;font-size:11px;color:rgba(255,255,255,.38);line-height:1.5}
+
+/* ---------- 响应式 ---------- */
+@media (max-width:1240px){
+  .cp-kpis{grid-template-columns:repeat(4,1fr)}
+  .span-8,.span-6,.span-5{grid-column:span 12}
+  .span-4,.span-3{grid-column:span 6}
+}
+@media (max-width:760px){
+  .cp-body{padding:16px 12px 32px}
+  .cp-kpis{grid-template-columns:repeat(2,1fr);gap:10px}
+  .kpi b{font-size:21px}
+  .span-4,.span-3{grid-column:span 12}
+  .cp-head{padding:0 14px;gap:10px}
+  .cp-title h1{font-size:14px;letter-spacing:.18em}
+  .cp-title p{font-size:8.5px;letter-spacing:.2em}
+  .cp-clock{display:none}
+  .cp-back{padding:7px 12px;font-size:12.5px}
+  .chart{height:210px}
+}
+</style>
 </head>
-<body class="dash-body">
+<body>
 
-<div class="dash-bg"></div>
-<div class="dash-bg__grid"></div>
-<canvas id="dashParticles" style="position:fixed;inset:0;width:100%;height:100%;z-index:1;pointer-events:none"></canvas>
+<div class="cockpit">
 
-<div class="dash-shell">
-  <div class="dash-content">
-
-    <!-- 顶部 -->
-    <header class="dash-header">
-      <div class="dash-header__title">
-        <span class="brand__emblem" style="width:36px;height:36px">
-          <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.6" style="width:20px;height:20px">
-            <path d="M12 2.5l2.6 2.1 3.3-.4 1.5 3 2.7 1.9-.7 3.2 2 2.6-2 2.6.7 3.2-2.7 1.9-1.5 3-3.3-.4L12 27l-2.6-2.1-3.3.4-1.5-3-2.7-1.9.7-3.2-2-2.6 2-2.6-.7-3.2 2.7-1.9 1.5-3 3.3.4z" transform="scale(0.72) translate(4.7 0)"/>
-            <path d="M12 9.5l.9 1.8 2 .3-1.45 1.4.34 2L12 14l-1.8.95.35-2L9.1 11.6l2-.3z"/>
-          </svg>
-        </span>
-        <h1>数字智能运营驾驶舱</h1>
-        <span class="tag">实时在线</span>
+  <!-- 顶部栏 -->
+  <header class="cp-head">
+    <a class="cp-back" href="index.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
+      返回门户
+    </a>
+    <div class="cp-title">
+      <h1>数字智能运营驾驶舱</h1>
+      <p>DIGITAL INTELLIGENCE OPERATIONS CENTER</p>
+    </div>
+    <div class="cp-right">
+      <span class="cp-live">LIVE</span>
+      <div class="cp-clock">
+        <div class="t num" id="cpClock">--:--:--</div>
+        <div class="d" id="cpDate">----</div>
       </div>
-      <div class="dash-header__clock" id="dashClock">--</div>
-    </header>
+    </div>
+  </header>
 
-    <!-- KPI 指标 -->
-    <div class="dash-kpi">
-      <div class="dash-kpi__item"><span class="trend">↑</span><b data-value="10" data-unit="家"></b><span>军工集团</span></div>
-      <div class="dash-kpi__item"><span class="trend">↑</span><b data-value="86" data-unit="家"></b><span>软件厂商</span></div>
-      <div class="dash-kpi__item"><span class="trend">↑</span><b data-value="120" data-unit="所"></b><span>高等院校</span></div>
-      <div class="dash-kpi__item"><span class="trend">↑</span><b data-value="12860" data-unit="人"></b><span>平台用户</span></div>
-      <div class="dash-kpi__item"><span class="trend">↑</span><b data-value="520" data-unit="款"></b><span>工业软件</span></div>
-      <div class="dash-kpi__item"><span class="trend">↑</span><b data-value="163" data-unit="项"></b><span>项目孵化</span></div>
-      <div class="dash-kpi__item"><span class="trend">↑</span><b data-value="47" data-unit="项"></b><span>成果转化</span></div>
+  <div class="cp-body">
+
+    <!-- KPI -->
+    <div class="cp-kpis" id="cpKpis">
+      <div class="kpi" data-tip="在线用户 1,284 人 · 较昨日 +6.2% · 峰值 1,402"><span>在线用户</span><b class="num" data-kpi="1284">1,284</b></div>
+      <div class="kpi" data-tip="今日新增需求 12 条 · 本月累计 86 条 · 来自军工/厂商/高校"><span>今日新增需求</span><b class="num" data-kpi="12">12</b></div>
+      <div class="kpi" data-tip="待匹配需求 86 条 · 六维匹配引擎持续计算中"><span>待匹配需求</span><b class="num" data-kpi="86">86</b></div>
+      <div class="kpi" data-tip="供需对接成功率 76.3% · 基于六维匹配模型"><span>对接成功率</span><b class="num" data-kpi="76.3" data-fix="1" data-suffix="%">76.3%</b></div>
+      <div class="kpi" data-tip="累计攻关任务 78 项 · 卡脖子 P0 12 项 · 替代 P1 23 项"><span>攻关任务（累计）</span><b class="num" data-kpi="78">78</b></div>
+      <div class="kpi" data-tip="在孵项目 57 项 · 创意→原型→产品→规模 四阶段"><span>在孵项目</span><b class="num" data-kpi="57">57</b></div>
+      <div class="kpi" data-tip="入库成果 1,530 项 · 覆盖八类成果 · 三级分级管控"><span>入库成果</span><b class="num" data-kpi="1530">1,530</b></div>
+      <div class="kpi" data-tip="基金拨付 8,600 万元 · 种子/攻关/转化三类基金"><span>基金拨付（万元）</span><b class="num" data-kpi="8600">8,600</b></div>
     </div>
 
-    <!-- 图表区 -->
-    <div class="dash-grid">
-
-      <div class="dash-panel col-6">
-        <div class="dash-panel__head"><h3>平台用户增长趋势</h3><span class="hint">近九个月 · 单位：人</span></div>
-        <canvas id="chartUserTrend" class="dash-panel__canvas" style="height:230px"></canvas>
-      </div>
-
-      <div class="dash-panel col-6">
-        <div class="dash-panel__head"><h3>成果转化趋势</h3><span class="hint">近九个月 · 单位：项</span></div>
-        <canvas id="chartTransformTrend" class="dash-panel__canvas" style="height:230px"></canvas>
-      </div>
-
-      <div class="dash-panel col-4">
-        <div class="dash-panel__head"><h3>六大领域需求分布</h3><span class="hint">攻关需求 · 单位：条</span></div>
-        <canvas id="chartDomain" class="dash-panel__canvas" style="height:230px"></canvas>
-      </div>
-
-      <div class="dash-panel col-4">
-        <div class="dash-panel__head"><h3>成果类型分布</h3><span class="hint">入库成果 · 单位：项</span></div>
-        <canvas id="chartOutcome" class="dash-panel__canvas" style="height:230px"></canvas>
-      </div>
-
-      <div class="dash-panel col-4">
-        <div class="dash-panel__head"><h3>生态健康度评估</h3><span class="hint">六维评分</span></div>
-        <canvas id="chartHealth" class="dash-panel__canvas" style="height:230px"></canvas>
-      </div>
-
-      <div class="dash-panel col-4">
-        <div class="dash-panel__head"><h3>人才画像示例</h3><span class="hint">能力六维雷达</span></div>
-        <canvas id="chartTalent" class="dash-panel__canvas" style="height:230px"></canvas>
-      </div>
-
-      <div class="dash-panel col-4">
-        <div class="dash-panel__head"><h3>供需匹配概况</h3><span class="hint">六维匹配模型</span></div>
-        <div class="dash-metric-list">
-          <div class="dash-metric"><span>待匹配需求</span><b>38</b><i>条</i></div>
-          <div class="dash-metric"><span>在库供给能力</span><b>152</b><i>项</i></div>
-          <div class="dash-metric"><span>本月完成对接</span><b>86</b><i>次</i></div>
-          <div class="dash-metric"><span>对接成功率</span><b>72</b><i>%</i></div>
+    <!-- 图表网格 -->
+    <div class="cp-grid">
+      <div class="cp-card span-8"><h3>供需对接趋势<span class="sub">LAST 30 DAYS</span></h3><canvas class="chart" id="chTrend"></canvas></div>
+      <div class="cp-card span-4"><h3>国产化替代进程<span class="sub">OVERALL RATE</span></h3><canvas class="chart" id="chGauge"></canvas></div>
+      <div class="cp-card span-4"><h3>六大军工领域需求分布<span class="sub">BY DOMAIN</span></h3><canvas class="chart" id="chDomain"></canvas></div>
+      <div class="cp-card span-4"><h3>人才能力结构<span class="sub">TALENT RADAR</span></h3><canvas class="chart" id="chRadar"></canvas></div>
+      <div class="cp-card span-4"><h3>入库成果构成<span class="sub">8 CATEGORIES</span></h3><canvas class="chart" id="chDonut"></canvas></div>
+      <div class="cp-card span-5"><h3>生态贡献榜单<span class="sub">TOP 6</span></h3><canvas class="chart" id="chRank"></canvas></div>
+      <div class="cp-card span-4"><h3>攻关任务看板<span class="sub">TASK BOARD</span></h3>
+        <div class="board" id="board">
+          <div class="board-row" data-tip="待发布 8 项 · 已完成需求梳理与结构化入库"><div class="bh"><span>待发布</span><b class="num">8 项</b></div><div class="bo"><i data-w="10%" style="background:#8A96AA"></i></div></div>
+          <div class="board-row" data-tip="揭榜中 15 项 · 面向全国公开征集攻关方案"><div class="bh"><span>揭榜中</span><b class="num">15 项</b></div><div class="bo"><i data-w="19%" style="background:#5B93E3"></i></div></div>
+          <div class="board-row" data-tip="攻坚中 18 项 · 月度汇报 + 季度评审 + 里程碑考核"><div class="bh"><span>攻坚中</span><b class="num">18 项</b></div><div class="bo"><i data-w="23%" style="background:#2E8A6B"></i></div></div>
+          <div class="board-row" data-tip="待验收 6 项 · 成果验收 + 军工确认"><div class="bh"><span>待验收</span><b class="num">6 项</b></div><div class="bo"><i data-w="8%" style="background:#C08428"></i></div></div>
+          <div class="board-row" data-tip="已突破 31 项 · 成果入库并进入生态推广"><div class="bh"><span>已突破</span><b class="num">31 项</b></div><div class="bo"><i data-w="40%" style="background:#C9A55C"></i></div></div>
         </div>
       </div>
-
-      <div class="dash-panel col-4">
-        <div class="dash-panel__head"><h3>专项基金运营</h3><span class="hint">三类基金</span></div>
-        <div class="dash-metric-list">
-          <div class="dash-metric"><span>种子基金 0-100万</span><b>42</b><i>项立项</i></div>
-          <div class="dash-metric"><span>攻关基金 100-500万</span><b>18</b><i>项立项</i></div>
-          <div class="dash-metric"><span>转化基金 500-2000万</span><b>7</b><i>项立项</i></div>
-          <div class="dash-metric"><span>累计拨付资金</span><b>3.2</b><i>亿元</i></div>
-        </div>
-      </div>
-
-      <div class="dash-panel col-12">
-        <div class="dash-panel__head"><h3>实时业务动态</h3><span class="hint">平台最新动态</span></div>
-        <div class="dash-feed">
-          <div class="dash-feed__item"><span class="time">14:32</span><span class="dot-p"></span><p>航空结构强度 CAE 求解器替代攻关项目 <b>进入执行阶段</b></p></div>
-          <div class="dash-feed__item"><span class="time">13:58</span><span class="dot-p"></span><p>揭榜任务「几何内核布尔运算引擎」新增揭榜单位 2 家</p></div>
-          <div class="dash-feed__item"><span class="time">12:41</span><span class="dot-p"></span><p>春雷大赛报名人数突破 2,300 人</p></div>
-          <div class="dash-feed__item"><span class="time">11:07</span><span class="dot-p"></span><p>某国产 EDA 工具完成军工电子场景应用验证并入库</p></div>
-          <div class="dash-feed__item"><span class="time">09:20</span><span class="dot-p"></span><p>成果「多体动力学约束求解器」完成三方联合验收</p></div>
-        </div>
-      </div>
-
+      <div class="cp-card span-3"><h3>实时动态<span class="sub">LIVE FEED</span></h3><div class="cp-feed" id="cpFeed"></div></div>
     </div>
 
-    <div style="text-align:center;padding:26px 0 10px;font-size:12px;color:#4a6a86;letter-spacing:0.05em">
-      国家国防科技工业软件产教研平台 · 数据实时刷新 · <a href="index.html" style="color:#4db3f0">返回首页</a>
-    </div>
+    <div class="cp-note">DATA SOURCE: PLATFORM OPERATIONS · DEMO DATA FOR PRESENTATION</div>
   </div>
 </div>
 
-<script src="assets/js/main.js"></script>
+<!-- 悬浮提示 -->
+<div class="cp-tip" id="cpTip"></div>
+
+<script>
+(function(){
+  'use strict';
+  var $=function(s,c){return (c||document).querySelector(s)};
+  var $$=function(s,c){return Array.prototype.slice.call((c||document).querySelectorAll(s))};
+  var DPR=Math.min(window.devicePixelRatio||1,2);
+
+  /* ================= Tooltip ================= */
+  var tipEl=$('#cpTip');
+  function showTip(html,x,y){
+    tipEl.innerHTML=html;
+    tipEl.style.display='block';
+    var w=tipEl.offsetWidth,h=tipEl.offsetHeight;
+    var left=x+16,top=y-h-12;
+    if(left+w>window.innerWidth-8)left=x-w-16;
+    if(left<8)left=8;
+    if(top<8)top=y+18;
+    tipEl.style.left=left+'px';
+    tipEl.style.top=top+'px';
+  }
+  function hideTip(){tipEl.style.display='none';}
+
+  /* ================= KPI 悬浮 + 数字微动 ================= */
+  $$('.kpi').forEach(function(k){
+    k.addEventListener('mousemove',function(e){showTip('<div class="tt"><i></i>指标说明</div><div class="foot">'+k.getAttribute('data-tip')+'</div>',e.clientX,e.clientY)});
+    k.addEventListener('mouseleave',hideTip);
+  });
+
+  /* ================= 时钟 ================= */
+  function startClock(){
+    function tick(){
+      var n=new Date(),p=function(x){return (x<10?'0':'')+x};
+      $('#cpClock').textContent=p(n.getHours())+':'+p(n.getMinutes())+':'+p(n.getSeconds());
+      var wd=['日','一','二','三','四','五','六'];
+      $('#cpDate').textContent=n.getFullYear()+'-'+p(n.getMonth()+1)+'-'+p(n.getDate())+' 星期'+wd[n.getDay()];
+    }
+    tick();setInterval(tick,1000);
+    /* KPI 数字微动 */
+    setInterval(function(){
+      $$('#cpKpis [data-kpi]').forEach(function(el){
+        var base=parseFloat(el.getAttribute('data-kpi')),fix=el.getAttribute('data-fix');
+        var v=base+(Math.random()*base*.004*(Math.random()<.7?1:-1));
+        v=fix?parseFloat(v.toFixed(1)):Math.round(v);
+        el.textContent=v.toLocaleString('zh-CN')+(el.getAttribute('data-suffix')||'');
+      });
+    },3000);
+  }
+
+  /* ================= 图表引擎 ================= */
+  function makeChart(id, draw, hit){
+    var cv=$('#'+id);if(!cv)return;
+    var ctx=cv.getContext('2d');
+    var st={w:0,h:0};
+    function resize(){
+      st.w=cv.clientWidth;st.h=cv.clientHeight;
+      cv.width=st.w*DPR;cv.height=st.h*DPR;
+      ctx.setTransform(DPR,0,0,DPR,0,0);
+    }
+    function render(){ctx.clearRect(0,0,st.w,st.h);draw(ctx,st);}
+    cv.addEventListener('mousemove',function(e){
+      var r=cv.getBoundingClientRect();
+      var info=hit(e.clientX-r.left,e.clientY-r.top,st);
+      if(info){showTip(info.html,e.clientX,e.clientY);cv.style.cursor='pointer';}
+      else{cv.style.cursor='default';hideTip();}
+    });
+    cv.addEventListener('mouseleave',hideTip);
+    resize();render();
+    window.addEventListener('resize',function(){resize();render();});
+    return {cv:cv,ctx:ctx,st:st,render:render,resize:resize};
+  }
+
+  function tipRow(label,val,color){
+    return '<div class="row"><span><span class="swatch" style="background:'+color+'"></span>'+label+'</span><b>'+val+'</b></div>';
+  }
+
+  /* ================= 1. 供需对接趋势（折线） ================= */
+  (function(){
+    var days=[],d1=[],d2=[];
+    var now=new Date();
+    for(var i=29;i>=0;i--){
+      var t=new Date(now.getTime()-i*86400000);
+      days.push((t.getMonth()+1)+'/'+t.getDate());
+      d1.push(Math.round(18+Math.sin(i/4)*6+Math.random()*8));
+      d2.push(Math.round(10+Math.sin(i/4+1)*4+Math.random()*7));
+    }
+    function draw(ctx,st){
+      var padL=34,padR=12,padT=22,padB=24,cw=st.w-padL-padR,ch=st.h-padT-padB;
+      var max=Math.max.apply(null,d1)*1.15;
+      for(var g=0;g<=3;g++){var gy=padT+ch*g/3;ctx.strokeStyle='rgba(140,170,210,.08)';ctx.lineWidth=1;
+        ctx.beginPath();ctx.moveTo(padL,gy);ctx.lineTo(st.w-padR,gy);ctx.stroke();}
+      function px(i){return padL+(days.length===1?cw/2:cw*i/(days.length-1))}
+      function py(v){return padT+ch*(1-v/max)}
+      function line(data,color,fill){
+        var grad=ctx.createLinearGradient(0,padT,0,padT+ch);
+        grad.addColorStop(0,fill);grad.addColorStop(1,'rgba(0,0,0,0)');
+        ctx.beginPath();data.forEach(function(v,i){i?ctx.lineTo(px(i),py(v)):ctx.moveTo(px(i),py(v))});
+        ctx.lineTo(px(data.length-1),padT+ch);ctx.lineTo(px(0),padT+ch);ctx.closePath();
+        ctx.fillStyle=grad;ctx.fill();
+        ctx.beginPath();data.forEach(function(v,i){i?ctx.lineTo(px(i),py(v)):ctx.moveTo(px(i),py(v))});
+        ctx.strokeStyle=color;ctx.lineWidth=2;ctx.stroke();
+      }
+      line(d2,'#C9A55C','rgba(201,165,92,.20)');
+      line(d1,'#5B93E3','rgba(91,147,227,.28)');
+      ctx.fillStyle='rgba(255,255,255,.38)';ctx.font='10px '+'"PingFang SC",sans-serif';ctx.textAlign='center';
+      for(var k=0;k<days.length;k+=5)ctx.fillText(days[k],px(k),st.h-8);
+    }
+    function hit(x,y,st){
+      var padL=34,cw=st.w-padL-12,ch=st.h-22-24;
+      if(x<padL||x>st.w-12||y<22||y>st.h-24)return null;
+      var i=Math.round((x-padL)/cw*(days.length-1));
+      i=Math.max(0,Math.min(days.length-1,i));
+      return {html:'<div class="tt"><i></i>'+days[i]+'</div>'
+        +tipRow('需求发布',d1[i]+' 条','#5B93E3')
+        +tipRow('成功对接',d2[i]+' 条','#C9A55C')};
+    }
+    var chart=makeChart('chTrend',draw,hit);
+    /* 定时滚动 */
+    setInterval(function(){
+      var t=new Date();
+      days.shift();days.push((t.getMonth()+1)+'/'+t.getDate());
+      d1.shift();d1.push(Math.round(18+Math.random()*14));
+      d2.shift();d2.push(Math.round(10+Math.random()*10));
+      chart.render();
+    },5000);
+  })();
+
+  /* ================= 2. 国产化替代进程（Gauge 仪表盘） ================= */
+  (function(){
+    var target=31.6,current=0;
+    function draw(ctx,st){
+      var cx=st.w/2,cy=st.h*0.56,R=Math.min(st.w,st.h)*0.5-8;
+      var a0=150*Math.PI/180,a1=30*Math.PI/180;
+      function arc(r,from,to,color,width){
+        ctx.beginPath();ctx.arc(cx,cy,r,from,to,false);
+        ctx.strokeStyle=color;ctx.lineWidth=width;ctx.lineCap='round';ctx.stroke();
+      }
+      /* 背景弧 */
+      arc(R,a0,a1,'rgba(255,255,255,.07)',13);
+      /* 刻度 */
+      for(var i=0;i<=10;i++){
+        var a=a0+(a1+Math.PI*2-a0)*(i/10);
+        var r1=R-13-6,r2=R-13-(i%5===0?10:7);
+        ctx.beginPath();
+        ctx.moveTo(cx+Math.cos(a)*r1,cy+Math.sin(a)*r1);
+        ctx.lineTo(cx+Math.cos(a)*r2,cy+Math.sin(a)*r2);
+        ctx.strokeStyle=i/10<=target/100?'rgba(201,165,92,.6)':'rgba(140,170,210,.28)';
+        ctx.lineWidth=1;ctx.stroke();
+      }
+      /* 进度弧 */
+      var prog=a0+(a1+Math.PI*2-a0)*(current/100);
+      var grad=ctx.createLinearGradient(cx-R,cy,cx+R,cy);
+      grad.addColorStop(0,'#2F6FD0');grad.addColorStop(1,'#C9A55C');
+      arc(R,a0,prog,grad,13);
+      /* 中心文字 */
+      ctx.fillStyle='#E3C88E';ctx.textAlign='center';
+      ctx.font='700 30px '+"'Bahnschrift','Segoe UI',sans-serif";
+      ctx.fillText(current.toFixed(1)+'%',cx,cy+8);
+      ctx.fillStyle='rgba(255,255,255,.5)';ctx.font='12px '+"'PingFang SC',sans-serif";
+      ctx.fillText('整体国产化率',cx,cy+30);
+    }
+    function hit(x,y,st){
+      var cx=st.w/2,cy=st.h*0.56,R=Math.min(st.w,st.h)*0.5-8;
+      var d=Math.sqrt((x-cx)*(x-cx)+(y-cy)*(y-cy));
+      if(d>R+20)return null;
+      return {html:'<div class="tt"><i></i>国产化替代进程</div>'
+        +'<div class="row"><span>整体国产化率</span><b>'+target.toFixed(1)+'%</b></div>'
+        +'<div class="row"><span>覆盖软件类型</span><b>CAD / CAE / EDA</b></div>'
+        +'<div class="foot">目标 2027 年国产化率达 50% · 当前已替代 12 型装备场景</div>'};
+    }
+    var chart=makeChart('chGauge',draw,hit);
+    /* 进入动画 */
+    var t0=null;
+    (function anim(ts){
+      if(!t0)t0=ts;
+      var p=Math.min((ts-t0)/1600,1),e=1-Math.pow(1-p,3);
+      current=target*e;chart.render();
+      if(p<1)requestAnimationFrame(anim);
+    })(performance.now());
+  })();
+
+  /* ================= 3. 六大军工领域需求分布（横向柱状） ================= */
+  (function(){
+    var data=[['航空',92,'#C9A55C'],['航天',84,'#B8CF6E'],['电子',88,'#5B93E3'],['船舶',76,'#7FAEEA'],['兵器',71,'#4A80C0'],['核',34,'#3E6FA8']];
+    function draw(ctx,st){
+      var padL=34,padR=40,padT=12,padB=24,cw=st.w-padL-padR,ch=st.h-padT-padB;
+      var max=100,bh=ch/data.length-10;
+      data.forEach(function(d,i){
+        var y=padT+i*(ch/data.length)+2;
+        ctx.fillStyle='rgba(255,255,255,.5)';ctx.textAlign='right';ctx.font='11px '+"'PingFang SC',sans-serif";
+        ctx.fillText(d[0],padL-8,y+bh/2+4);
+        var bw=cw*(d[1]/max);
+        var grad=ctx.createLinearGradient(padL,0,padL+bw,0);
+        grad.addColorStop(0,d[2]+'cc');grad.addColorStop(1,d[2]);
+        roundRect(ctx,padL,y,bw,bh,3);ctx.fillStyle=grad;ctx.fill();
+        ctx.fillStyle='rgba(255,255,255,.6)';ctx.textAlign='left';ctx.font='11px '+"'Bahnschrift',sans-serif";
+        ctx.fillText(d[1],padL+bw+6,y+bh/2+4);
+      });
+    }
+    function roundRect(ctx,x,y,w,h,r){r=Math.min(r,w/2,h/2);ctx.beginPath();
+      ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();}
+    function hit(x,y,st){
+      var padL=34,padT=12,ch=st.h-padT-24,cw=st.w-padL-40;
+      if(x<padL||x>st.w)return null;
+      var idx=Math.floor((y-padT)/(ch/data.length));
+      if(idx<0||idx>=data.length)return null;
+      var d=data[idx];
+      return {html:'<div class="tt"><i></i>'+d[0]+'领域</div>'+tipRow('攻关需求',d[1]+' 条',d[2])};
+    }
+    makeChart('chDomain',draw,hit);
+  })();
+
+  /* ================= 4. 人才能力结构（雷达） ================= */
+  (function(){
+    var dims=[['理论知识',86],['实操技能',92],['工程素养',78],['创新攻关',74],['国产化意识',95],['协同能力',81]];
+    function draw(ctx,st){
+      var cx=st.w/2,cy=st.h/2+6,R=Math.min(st.w,st.h)/2-30;
+      var n=dims.length;
+      function ang(i){return -Math.PI/2+i*Math.PI*2/n}
+      for(var ring=1;ring<=4;ring++){
+        ctx.beginPath();
+        for(var i=0;i<n;i++){var rr=R*ring/4;var x=cx+Math.cos(ang(i))*rr,y=cy+Math.sin(ang(i))*rr;i?ctx.lineTo(x,y):ctx.moveTo(x,y);}
+        ctx.closePath();ctx.strokeStyle='rgba(140,170,210,.14)';ctx.lineWidth=1;ctx.stroke();
+      }
+      for(var a=0;a<n;a++){ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(cx+Math.cos(ang(a))*R,cy+Math.sin(ang(a))*R);
+        ctx.strokeStyle='rgba(140,170,210,.12)';ctx.stroke();}
+      ctx.beginPath();
+      dims.forEach(function(d,i){var rr=R*clamp(d[1]/100,0,1);var x=cx+Math.cos(ang(i))*rr,y=cy+Math.sin(ang(i))*rr;i?ctx.lineTo(x,y):ctx.moveTo(x,y);});
+      ctx.closePath();ctx.fillStyle='rgba(201,165,92,.18)';ctx.fill();
+      ctx.strokeStyle='#C9A55C';ctx.lineWidth=2;ctx.stroke();
+      dims.forEach(function(d,i){
+        var rr=R*clamp(d[1]/100,0,1);
+        ctx.beginPath();ctx.arc(cx+Math.cos(ang(i))*rr,cy+Math.sin(ang(i))*rr,3.5,0,Math.PI*2);
+        ctx.fillStyle='#E3C88E';ctx.fill();
+      });
+      ctx.fillStyle='rgba(255,255,255,.6)';ctx.font='11px '+"'PingFang SC',sans-serif";ctx.textAlign='center';ctx.textBaseline='middle';
+      dims.forEach(function(d,i){
+        var lx=cx+Math.cos(ang(i))*(R+16),ly=cy+Math.sin(ang(i))*(R+16);
+        ctx.fillText(d[0],lx,ly);
+      });
+      ctx.textBaseline='alphabetic';
+    }
+    function clamp(v,a,b){return Math.max(a,Math.min(b,v))}
+    function hit(x,y,st){
+      var cx=st.w/2,cy=st.h/2+6,R=Math.min(st.w,st.h)/2-30,n=dims.length;
+      var best=-1,bd=1e9;
+      for(var i=0;i<n;i++){
+        var rr=R*clamp(dims[i][1]/100,0,1);
+        var px=cx+Math.cos(-Math.PI/2+i*Math.PI*2/n)*rr,py=cy+Math.sin(-Math.PI/2+i*Math.PI*2/n)*rr;
+        var d=(x-px)*(x-px)+(y-py)*(y-py);
+        if(d<bd){bd=d;best=i;}
+      }
+      if(bd>24*24)return null;
+      return {html:'<div class="tt"><i></i>'+dims[best][0]+'</div>'+tipRow('平台人才均值',dims[best][1]+' / 100','#C9A55C')};
+    }
+    makeChart('chRadar',draw,hit);
+  })();
+
+  /* ================= 5. 入库成果构成（环形） ================= */
+  (function(){
+    var data=[['软件成果',386,'#5B93E3'],['验证报告',264,'#7FAEEA'],['工程案例',232,'#C9A55C'],['基准数据',186,'#B8CF6E'],['技术报告',168,'#8A6FD0'],['规范标准',126,'#4FB693'],['课程资源',104,'#E3C88E'],['人才数据',64,'#8A96AA']];
+    var total=data.reduce(function(a,b){return a+b[1]},0);
+    function draw(ctx,st){
+      var cx=st.w*0.34,cy=st.h/2,R=Math.min(st.w*0.32,st.h*0.44);
+      var r0=R*0.62,start=-Math.PI/2;
+      data.forEach(function(d){
+        var ang=d[1]/total*Math.PI*2;
+        ctx.beginPath();ctx.arc(cx,cy,R,start,start+ang);ctx.arc(cx,cy,r0,start+ang,start,true);ctx.closePath();
+        ctx.fillStyle=d[2];ctx.fill();
+        start+=ang;
+      });
+      ctx.fillStyle='#fff';ctx.textAlign='center';
+      ctx.font='700 22px '+"'Bahnschrift',sans-serif";
+      ctx.fillText(total.toLocaleString(),cx,cy-2);
+      ctx.fillStyle='rgba(255,255,255,.45)';ctx.font='11px '+"'PingFang SC',sans-serif";
+      ctx.fillText('入库成果',cx,cy+16);
+      /* 图例 */
+      var lx=st.w*0.66,ly=st.h/2-data.length/2*19+8;
+      data.forEach(function(d,i){
+        var y=ly+i*19;
+        ctx.fillStyle=d[2];ctx.fillRect(lx,y-5,9,9);
+        ctx.fillStyle='rgba(255,255,255,.6)';ctx.textAlign='left';ctx.font='11px '+"'PingFang SC',sans-serif";
+        ctx.fillText(d[0],lx+15,y+2);
+      });
+    }
+    function hit(x,y,st){
+      var cx=st.w*0.34,cy=st.h/2,R=Math.min(st.w*0.32,st.h*0.44);
+      var dx=x-cx,dy=y-cy,d=Math.sqrt(dx*dx+dy*dy);
+      if(d<R*0.62||d>R)return null;
+      var ang=Math.atan2(dy,dx)+Math.PI/2;if(ang<0)ang+=Math.PI*2;
+      var acc=0,idx=-1;
+      for(var i=0;i<data.length;i++){acc+=data[i][1]/total*Math.PI*2;if(ang<=acc){idx=i;break;}}
+      if(idx<0)return null;
+      var dd=data[idx];
+      return {html:'<div class="tt"><i></i>'+dd[0]+'</div>'
+        +tipRow('数量',dd[1].toLocaleString()+' 项',dd[2])
+        +tipRow('占比',(dd[1]/total*100).toFixed(1)+'%',dd[2])};
+    }
+    makeChart('chDonut',draw,hit);
+  })();
+
+  /* ================= 6. 生态贡献榜单（TOP6 横向柱状） ================= */
+  (function(){
+    var data=[['华大九天',246,'#C9A55C'],['中望软件',204,'#B8CF6E'],['北京航空航天大学',186,'#7FAEEA'],['安世亚太',178,'#5B93E3'],['哈尔滨工业大学',156,'#4A80C0'],['电子科技大学',132,'#3E6FA8']];
+    function draw(ctx,st){
+      var padL=98,padR=44,padT=10,padB=24,cw=st.w-padL-padR,ch=st.h-padT-padB;
+      var max=260,bh=ch/data.length-8;
+      data.forEach(function(d,i){
+        var y=padT+i*(ch/data.length)+4;
+        ctx.fillStyle='rgba(255,255,255,.6)';ctx.textAlign='right';ctx.font='11px '+"'PingFang SC',sans-serif";
+        ctx.fillText(d[0],padL-8,y+bh/2+4);
+        var bw=cw*(d[1]/max);
+        var grad=ctx.createLinearGradient(padL,0,padL+bw,0);
+        grad.addColorStop(0,d[2]+'cc');grad.addColorStop(1,d[2]);
+        roundRect(ctx,padL,y,bw,bh,3);ctx.fillStyle=grad;ctx.fill();
+        ctx.fillStyle='rgba(255,255,255,.6)';ctx.textAlign='left';ctx.font='11px '+"'Bahnschrift',sans-serif";
+        ctx.fillText(d[1],padL+bw+6,y+bh/2+4);
+      });
+    }
+    function roundRect(ctx,x,y,w,h,r){r=Math.min(r,w/2,h/2);ctx.beginPath();
+      ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();}
+    function hit(x,y,st){
+      var padL=98,padT=10,ch=st.h-padT-24;
+      if(x<padL)return null;
+      var idx=Math.floor((y-padT)/(ch/data.length));
+      if(idx<0||idx>=data.length)return null;
+      var d=data[idx];
+      return {html:'<div class="tt"><i></i>'+d[0]+'</div>'+tipRow('生态贡献指数',d[1],d[2])+'<div class="foot">贡献维度：成果 · 人才 · 需求响应 · 技术推广</div>'};
+    }
+    makeChart('chRank',draw,hit);
+  })();
+
+  /* ================= 7. 攻关任务看板（进度条动画 + 悬浮） ================= */
+  $$('#board .board-row').forEach(function(r){
+    r.addEventListener('mousemove',function(e){showTip('<div class="tt"><i></i>攻关任务</div><div class="foot">'+r.getAttribute('data-tip')+'</div>',e.clientX,e.clientY)});
+    r.addEventListener('mouseleave',hideTip);
+  });
+  setTimeout(function(){
+    $$('#board .bo i').forEach(function(i){i.style.width=i.getAttribute('data-w')});
+  },300);
+
+  /* ================= 8. 实时动态 ================= */
+  (function(){
+    var pool=[
+      ['华大九天','完成 EDA 时序工具 v3.2 适配验证，验证报告已入库'],
+      ['某航空工业集团','发布 CAE 国产化替代需求 N-2026-086，预算 800 万元'],
+      ['北京航空航天大学','提交成果《几何内核大规模装配加速算法》'],
+      ['中望软件','× 兵器某院 签署 CAD 适配验证合作协议'],
+      ['供需匹配引擎','完成 24 组智能匹配，平均匹配度 87.3%'],
+      ['春雷大赛','新增报名 36 支队伍，累计 1,286 队'],
+      ['哈尔滨工程大学','32 名学员通过 L3 认证考核'],
+      ['专项基金','完成本月第二笔拨付，金额 120 万元'],
+      ['安世亚太','仿真数据管理模块通过中期评审'],
+      ['概伦电子','器件建模精度对标达 98%，进入推广期']
+    ];
+    var feed=$('#cpFeed'),idx=0;
+    function add(){
+      var it=pool[idx%pool.length];idx++;
+      var n=new Date(),p=function(x){return (x<10?'0':'')+x};
+      var d=document.createElement('div');
+      d.className='feed-item';
+      d.innerHTML='<span class="fi-t">'+p(n.getHours())+':'+p(n.getMinutes())+'</span><p><b>'+it[0]+'</b> · '+it[1]+'</p>';
+      feed.insertBefore(d,feed.firstChild);
+      while(feed.children.length>9)feed.removeChild(feed.lastChild);
+    }
+    for(var i=0;i<6;i++)add();
+    setInterval(add,4000);
+  })();
+
+  /* ================= 启动 ================= */
+  startClock();
+})();
+</script>
 </body>
 </html>
