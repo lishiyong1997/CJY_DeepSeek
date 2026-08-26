@@ -45,12 +45,12 @@
           nav.style.display = 'flex';
           nav.style.flexDirection = 'column';
           nav.style.position = 'absolute';
-          nav.style.top = '68px';
+          nav.style.top = '96px';
           nav.style.left = '0';
           nav.style.right = '0';
-          nav.style.background = '#fff';
+          nav.style.background = 'linear-gradient(180deg, #0a2746, #0e345a)';
           nav.style.padding = '12px 0';
-          nav.style.boxShadow = '0 24px 40px rgba(18,35,61,0.14)';
+          nav.style.boxShadow = '0 24px 40px rgba(3,12,24,0.5)';
         } else {
           nav.style.display = '';
           nav.style.flexDirection = '';
