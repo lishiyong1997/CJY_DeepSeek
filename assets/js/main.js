@@ -75,16 +75,18 @@
     var start = null;
     var decimals = opts.decimals || 0;
     var from = opts.from || 0;
+    var grouping = opts.grouping !== false;
 
+    function render(v) { return grouping ? fmt(v) : String(v); }
     function easeOutExpo(t) { return t === 1 ? 1 : 1 - Math.pow(2, -10 * t); }
 
     function step(ts) {
       if (!start) start = ts;
       var p = clamp((ts - start) / duration, 0, 1);
       var v = lerp(from, target, easeOutExpo(p));
-      el.textContent = fmt(Math.round(v * Math.pow(10, decimals)) / Math.pow(10, decimals));
+      el.textContent = render(Math.round(v * Math.pow(10, decimals)) / Math.pow(10, decimals));
       if (p < 1) requestAnimationFrame(step);
-      else el.textContent = fmt(target);
+      else el.textContent = render(target);
     }
     requestAnimationFrame(step);
   }
@@ -107,7 +109,11 @@
           u.textContent = unit;
           el.appendChild(u);
         }
-        animateNumber(main, val, { duration: 1600 + Math.random() * 500 });
+        // 数字位数越长，字号自适应缩小，保证在窄卡片内完整显示
+        var chars = Math.round(val).toString().length;
+        var fs = chars >= 5 ? 22 : (chars >= 4 ? 28 : (chars >= 3 ? 36 : 42));
+        main.style.fontSize = fs + 'px';
+        animateNumber(main, val, { duration: 1600 + Math.random() * 500, grouping: false });
       });
     };
 
