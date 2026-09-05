@@ -325,8 +325,8 @@ h1, h2, h3, h4, h5 { font-weight: 700; line-height: 1.3; letter-spacing: 0.005em
    -------------------------------------------------------------------------- */
 .hero {
   position: relative; min-height: 100vh;
-  display: flex; align-items: center; justify-content: center;
-  padding: 140px 0 80px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: 108px 0 64px;
   overflow: hidden;
   background:
     radial-gradient(1100px 520px at 50% -8%, rgba(62, 122, 184, 0.88), rgba(30, 72, 120, 0.5) 58%, transparent 80%),
@@ -342,25 +342,17 @@ h1, h2, h3, h4, h5 { font-weight: 700; line-height: 1.3; letter-spacing: 0.005em
   mask-image: radial-gradient(ellipse at center, #000 20%, transparent 78%);
   -webkit-mask-image: radial-gradient(ellipse at center, #000 20%, transparent 78%);
 }
-.hero__content { position: relative; z-index: 2; text-align: center; color: #fff; }
-.hero__eyebrow {
-  display: inline-flex; align-items: center; gap: 10px;
-  font-size: 13px; letter-spacing: 0.28em; color: rgba(255,255,255,0.72);
-  margin-bottom: 30px;
-}
-.hero__eyebrow::before, .hero__eyebrow::after {
-  content: ""; width: 42px; height: 1px; background: rgba(255,255,255,0.35);
-}
+.hero__content { position: relative; z-index: 2; text-align: center; color: #fff; transform: translateY(-54px); }
 
 .hero__title {
   font-family: var(--font-serif);
-  font-size: clamp(38px, 6vw, 72px);
+  font-size: clamp(36px, 5.4vw, 64px);
   font-weight: 700; line-height: 1.12;
   letter-spacing: 0.06em;
   background: linear-gradient(180deg, #ffffff 30%, #dbe6f2 100%);
   -webkit-background-clip: text; background-clip: text;
   -webkit-text-fill-color: transparent;
-  margin-bottom: 26px;
+  margin-bottom: 22px;
 }
 .hero__title .accent-gold {
   background: linear-gradient(180deg, #f6dfa0, #c9a24a 78%);
@@ -368,38 +360,85 @@ h1, h2, h3, h4, h5 { font-weight: 700; line-height: 1.3; letter-spacing: 0.005em
   -webkit-text-fill-color: transparent;
 }
 .hero__subtitle {
-  font-size: clamp(15px, 2vw, 21px);
+  font-size: clamp(15px, 1.9vw, 20px);
   font-weight: 400; line-height: 1.9;
   color: rgba(255,255,255,0.88);
   letter-spacing: 0.08em;
   max-width: 820px; margin: 0 auto;
 }
-.hero__actions { margin-top: 46px; display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+
+/* 主视觉 Elevated Cards */
+.hero__cards {
+  position: relative; z-index: 2;
+  margin-top: 42px;
+  width: 100%;
+  display: grid; grid-template-columns: repeat(7, 1fr); gap: 14px;
+}
+.hcard {
+  display: flex; flex-direction: column; justify-content: space-between; gap: 8px;
+  height: 128px; padding: 14px 14px 12px;
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.18);
+  border-radius: var(--r-md);
+  backdrop-filter: blur(8px) saturate(1.2);
+  -webkit-backdrop-filter: blur(8px) saturate(1.2);
+  box-shadow: 0 6px 18px rgba(4, 16, 32, 0.25);
+  cursor: pointer;
+  transition: transform var(--dur) var(--ease), background var(--dur) var(--ease), border-color var(--dur) var(--ease);
+  overflow: hidden;
+}
+.hcard:hover { background: rgba(255,255,255,0.18); border-color: rgba(227,200,142,.6); transform: translateY(-4px); }
+.hcard__head { display: flex; align-items: center; gap: 9px; min-width: 0; }
+.hcard__thumb {
+  flex-shrink: 0; width: 36px; height: 36px;
+  display: grid; place-items: center;
+  border-radius: 8px;
+  background: linear-gradient(135deg, rgba(227,200,142,.24), rgba(201,165,92,.1));
+  color: var(--gold-2);
+}
+.hcard__thumb .ico { width: 19px; height: 19px; }
+.hcard__name {
+  min-width: 0; font-size: 14px; color: #fff; font-weight: 600;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.hcard__body { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.hcard__row { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+.hcard__label { flex-shrink: 0; font-size: 11px; color: rgba(255,255,255,.55); letter-spacing: .03em; }
+.hcard__num {
+  font-family: var(--font-mono); font-size: 21px; font-weight: 700; line-height: 1;
+  color: var(--gold-2); white-space: nowrap; font-variant-numeric: tabular-nums;
+}
+.hcard__num i { font-style: normal; font-size: 11px; font-weight: 600; margin-left: 3px; color: rgba(255,255,255,.62); }
+.hcard__tags {
+  font-size: 11px; color: rgba(255,255,255,.6); line-height: 1.4;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.hcard--class { border-color: rgba(227,200,142,.55); background: linear-gradient(135deg, rgba(201,165,92,.28), rgba(201,165,92,.08)); }
+.hcard--class .hcard__thumb { background: linear-gradient(135deg, #c9a24a, #8f6f33); color: #fff; }
+.hcard--class .hcard__num { color: #f6dfa0; }
+
 .hero__scroll {
-  position: absolute; bottom: 34px; left: 50%; transform: translateX(-50%);
+  position: absolute; bottom: 22px; left: 50%; transform: translateX(-50%);
   z-index: 2; color: rgba(255,255,255,0.6);
   font-size: 12px; letter-spacing: 0.2em;
-  display: flex; flex-direction: column; align-items: center; gap: 8px;
+  display: none; flex-direction: column; align-items: center; gap: 8px;
 }
 .hero__scroll i {
-  width: 1px; height: 34px; background: linear-gradient(180deg, transparent, rgba(255,255,255,0.7));
+  width: 1px; height: 30px; background: linear-gradient(180deg, transparent, rgba(255,255,255,0.7));
   animation: scrollLine 2.2s var(--ease) infinite;
 }
 @keyframes scrollLine { 0% { transform: scaleY(0); transform-origin: top; } 50% { transform: scaleY(1); transform-origin: top; } 51% { transform-origin: bottom; } 100% { transform: scaleY(0); transform-origin: bottom; } }
-
-.hero .btn--ghost { color: #fff; border-color: rgba(255,255,255,0.4); }
-.hero .btn--ghost:hover { background: rgba(255,255,255,0.1); border-color: #fff; }
 
 /* --------------------------------------------------------------------------
    6. 横贯式数据卡片
    -------------------------------------------------------------------------- */
 .stat-band {
   position: relative; z-index: 5;
-  margin-top: -84px;
+  margin-top: -154px;
   padding: 0 0 8px;
 }
 .stat-band__grid {
-  display: grid; grid-template-columns: repeat(7, 1fr); gap: 16px;
+  display: grid; grid-template-columns: repeat(8, 1fr); gap: 14px;
 }
 .stat-card {
   position: relative;
@@ -428,17 +467,32 @@ h1, h2, h3, h4, h5 { font-weight: 700; line-height: 1.3; letter-spacing: 0.005em
 .stat-card:hover::after { opacity: 1; left: 6%; right: 6%; }
 .stat-card__num {
   font-family: var(--font-mono);
-  font-size: 50px; font-weight: 800; line-height: 1;
+  font-size: 42px; font-weight: 800; line-height: 1;
   color: var(--primary);
   letter-spacing: -0.02em;
   font-variant-numeric: tabular-nums;
+  white-space: nowrap;
 }
-.stat-card__num .unit { font-size: 21px; font-weight: 700; margin-left: 4px; color: var(--primary-3); }
-.stat-card__label { margin-top: 14px; font-size: 15px; font-weight: 600; color: var(--ink); letter-spacing: 0.08em; }
+.stat-card__num .unit { font-size: 16px; font-weight: 700; margin-left: 3px; color: var(--primary-3); }
+.stat-card__label { margin: 0 0 14px; font-size: 15px; font-weight: 600; color: var(--ink); letter-spacing: 0.08em; }
 .stat-card--gold .stat-card__num { color: var(--gold); }
 .stat-card--gold .stat-card__num .unit { color: var(--gold-2); }
 .stat-card--red .stat-card__num { color: var(--red); }
 .stat-card--red .stat-card__num .unit { color: var(--red); }
+/* 数字运营驾驶舱入口卡（协调但突出） */
+.stat-card--dash {
+  background: linear-gradient(160deg, #0e2b4e, #1a4c7e);
+  border-color: rgba(201,165,92,.45);
+}
+.stat-card--dash::after { background: linear-gradient(90deg, transparent, var(--gold-2), transparent); }
+.stat-card--dash:hover { border-color: var(--gold); }
+.stat-card__dash-icon {
+  display: flex; justify-content: center; align-items: center;
+  height: 50px;
+  color: var(--gold-2);
+}
+.stat-card__dash-icon svg { width: 42px; height: 42px; }
+.stat-card--dash .stat-card__label { color: #fff; margin: 14px 0 0; }
 
 /* --------------------------------------------------------------------------
    7. 横贯式工业分割条 + 内容分区（参考产教研平台设计）
@@ -796,6 +850,7 @@ h1, h2, h3, h4, h5 { font-weight: 700; line-height: 1.3; letter-spacing: 0.005em
   .site-footer__top { grid-template-columns: 1fr 1fr; }
   .mega-panel__intro { display: none; }
   .mega-panel__cols { grid-template-columns: repeat(2, 1fr); }
+  .hero__cards { grid-template-columns: repeat(4, 1fr); }
 }
 
 @media (max-width: 900px) {
@@ -803,6 +858,7 @@ h1, h2, h3, h4, h5 { font-weight: 700; line-height: 1.3; letter-spacing: 0.005em
   .nav-toggle { display: block; }
   .header-actions .btn--ghost { display: none; }
   .stat-band { margin-top: -48px; }
+  .hero__cards { grid-template-columns: repeat(3, 1fr); }
 }
 
 @media (max-width: 600px) {
@@ -812,8 +868,25 @@ h1, h2, h3, h4, h5 { font-weight: 700; line-height: 1.3; letter-spacing: 0.005em
   .stat-card { padding: 26px 14px 22px; }
   .stat-card__num { font-size: 34px; }
   .stat-card__num .unit { font-size: 16px; }
-  .hero__title { font-size: 34px; }
+  .stat-card__dash-icon { height: 36px; }
+  .stat-card__dash-icon svg { width: 32px; height: 32px; }
+  .hero { padding: 96px 0 56px; min-height: auto; }
+  .hero__cards { grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 32px; }
+  .hcard { height: 112px; padding: 10px 10px 9px; gap: 6px; }
+  .hcard__thumb { width: 30px; height: 30px; }
+  .hcard__thumb .ico { width: 16px; height: 16px; }
+  .hcard__name { font-size: 12px; }
+  .hcard__num { font-size: 18px; }
+  .hcard__label { font-size: 10px; }
+  .hcard__tags { font-size: 10px; }
+  .hero__title { font-size: 30px; }
+  .hero__scroll { display: none; }
   .site-footer__top { grid-template-columns: 1fr; gap: 28px; }
+}
+
+/* 数字卡片区上移后，Elevated Cards 同步微抬，避免重叠（仅桌面端） */
+@media (min-width: 601px) {
+  .hero__cards { transform: translateY(-48px); }
 }
 
 /* ==========================================================================
